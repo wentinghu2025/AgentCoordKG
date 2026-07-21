@@ -1,0 +1,130 @@
+{
+  "scenario_name": "Trip Planning Team with Budget Conflict — Case 7 for AgentCoordKG",
+  "description": "Hand-authored illustrative scenario in a fresh narrative domain (multi-agent trip planning), not modeled on any specific external framework. The domain is inspired by the 'Trip Planner' use case in Ekelhart et al.'s AgentO ontology (ESWC 2026), but re-designed to exercise AgentCoordKG's governance and coordination apparatus (delegation, constraint violation, conflict, resolution) rather than AgentO's own focus on declarative pattern reconstruction and component reuse -- a different ontological commitment from AgentCoordKG's.",
+  "instances": [
+    {
+      "id": "DestinationAgent",
+      "type": "Agent",
+      "label": "Destination Selection Agent",
+      "hasRole": "destination_selector"
+    },
+    {
+      "id": "SchedulingAgent",
+      "type": "Agent",
+      "label": "Itinerary Scheduling Agent",
+      "hasRole": "scheduler"
+    },
+    {
+      "id": "TravelPlanningEnvironment",
+      "type": "Environment",
+      "label": "Trip planning shared workspace"
+    },
+    {
+      "id": "ItineraryTask",
+      "type": "Task",
+      "label": "Build initial multi-day itinerary",
+      "status": "conflicted",
+      "partOfWorkflow": "trip-planning-workflow",
+      "derivedFromCitation": "45"
+    },
+    {
+      "id": "RevisedItineraryTask",
+      "type": "Task",
+      "label": "Revise itinerary to fit budget",
+      "status": "completed",
+      "partOfWorkflow": "trip-planning-workflow",
+      "derivedFromCitation": "24"
+    },
+    {
+      "id": "BudgetConstraint",
+      "type": "Constraint",
+      "label": "Total itinerary cost must not exceed traveler's budget"
+    },
+    {
+      "id": "BudgetConflict",
+      "type": "Conflict",
+      "label": "Itinerary cost exceeds traveler's stated budget",
+      "conflictType": "budget_violation",
+      "rationale": "The initial itinerary's total cost exceeded the budget the traveler specified to DestinationAgent."
+    },
+    {
+      "id": "ItineraryMessage",
+      "type": "Message",
+      "label": "Revised itinerary summary message",
+      "performative": "inform"
+    },
+    {
+      "id": "ItineraryApprovalDecision",
+      "type": "Decision",
+      "label": "Decision to approve the revised, budget-compliant itinerary"
+    }
+  ],
+  "relations": [
+    {
+      "subject": "DestinationAgent",
+      "property": "actsWithin",
+      "object": "TravelPlanningEnvironment"
+    },
+    {
+      "subject": "SchedulingAgent",
+      "property": "actsWithin",
+      "object": "TravelPlanningEnvironment"
+    },
+    {
+      "subject": "DestinationAgent",
+      "property": "delegatesTask",
+      "object": "ItineraryTask"
+    },
+    {
+      "subject": "ItineraryTask",
+      "property": "assignedTo",
+      "object": "SchedulingAgent"
+    },
+    {
+      "subject": "ItineraryTask",
+      "property": "occursIn",
+      "object": "TravelPlanningEnvironment"
+    },
+    {
+      "subject": "ItineraryTask",
+      "property": "violatesConstraint",
+      "object": "BudgetConstraint"
+    },
+    {
+      "subject": "BudgetConflict",
+      "property": "involvesAgent",
+      "object": "DestinationAgent"
+    },
+    {
+      "subject": "BudgetConflict",
+      "property": "involvesAgent",
+      "object": "SchedulingAgent"
+    },
+    {
+      "subject": "RevisedItineraryTask",
+      "property": "resolvesConflict",
+      "object": "BudgetConflict"
+    },
+    {
+      "subject": "RevisedItineraryTask",
+      "property": "dependsOn",
+      "object": "ItineraryTask"
+    },
+    {
+      "subject": "RevisedItineraryTask",
+      "property": "assignedTo",
+      "object": "SchedulingAgent"
+    },
+    {
+      "subject": "SchedulingAgent",
+      "property": "sendsMessage",
+      "object": "ItineraryMessage"
+    },
+    {
+      "subject": "ItineraryMessage",
+      "property": "supportsDecision",
+      "object": "ItineraryApprovalDecision"
+    }
+  ],
+  "story_summary": "A Destination agent delegates itinerary-building to a Scheduling agent, but the resulting itinerary exceeds the traveler's budget -- a conflict. The Scheduling agent revises the itinerary to fit the budget, and the revised plan is approved."
+}

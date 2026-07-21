@@ -1,0 +1,44 @@
+[
+  {
+    "original_id": "Original ID=K9",
+    "review_source": "Review4-Ke(LLM Reasoning Frontiers)",
+    "requirement_text": "Class: Message；Relation: exchangesMessage",
+    "proposition": "Agents exchange messages.",
+    "mapped_property": "sendsMessage"
+  },
+  {
+    "original_id": "Original ID=W9",
+    "review_source": "Review8-Wei(Agentic Reasoning/Governance)",
+    "requirement_text": "Worker role.",
+    "proposition": "Worker executes operational tasks.",
+    "mapped_property": "assignedTo"
+  },
+  {
+    "original_id": "Original ID=L20",
+    "review_source": "Review3-Liu(Foundation Agents)",
+    "requirement_text": "Ontology shall model shared workspaces.",
+    "proposition": "MAS are regulated by shared workspaces.",
+    "mapped_property": "actsWithin"
+  },
+  {
+    "original_id": "Original ID=T2",
+    "review_source": "Review5-Tran(Multi-agent Collaboration)",
+    "requirement_text": "Relation: senses",
+    "proposition": "Agents sense the environment.",
+    "mapped_property": "actsWithin"
+  },
+  {
+    "original_id": "Original ID=T4",
+    "review_source": "Review5-Tran(Multi-agent Collaboration)",
+    "requirement_text": "Agent capabilities",
+    "proposition": "Agent operates in an environment.",
+    "mapped_property": "actsWithin"
+  },
+  {
+    "original_id": "Original ID=T5",
+    "review_source": "Review5-Tran(Multi-agent Collaboration)",
+    "requirement_text": "Agent workflow",
+    "proposition": "Agents receive contextual data from the environment.",
+    "mapped_property": "actsWithin"
+  }
+]

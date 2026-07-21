@@ -1,0 +1,174 @@
+{
+  "scenario_name": "LangGraph-style Approval Routing Graph — Case 4 for AgentCoordKG",
+  "description": "Hand-authored scenario following LangGraph's real StateGraph/Node/Edge schema (confirmed via official LangGraph documentation), NOT a live LangGraph run. Demonstrates AgentCoordKG's coverage of a generic graph-execution framework, including the same disclosed Node-to-Agent interpretive judgment used in HarnessKG's LangGraph scenario, and a third independent confirmation that orchestration primitives (here, Edge) map onto AgentCoordKG's dependsOn rather than HarnessKG's vocabulary.",
+  "_langgraph_native_log": {
+    "_comment": "Mimics a real LangGraph StateGraph definition for a two-step approval routing flow. Not itself part of the RDF instance data.",
+    "state_schema": {
+      "request": "str",
+      "risk_flag": "bool",
+      "route": "str"
+    },
+    "nodes": [
+      {
+        "name": "assess_node",
+        "wraps_llm_call": true,
+        "description": "Wraps an LLM call to assess a request for risk -- mapped to ak:Agent"
+      },
+      {
+        "name": "route_check_node",
+        "wraps_llm_call": false,
+        "description": "Pure routing-logic function, no LLM call -- NOT mapped to ak:Agent"
+      },
+      {
+        "name": "escalate_node",
+        "wraps_llm_call": true,
+        "description": "Wraps an LLM call to handle escalated/flagged requests -- mapped to ak:Agent"
+      }
+    ],
+    "edges": [
+      {
+        "from": "assess_node",
+        "to": "route_check_node",
+        "type": "unconditional"
+      },
+      {
+        "from": "route_check_node",
+        "to": "escalate_node",
+        "type": "conditional",
+        "routing_result": "risk_flagged"
+      }
+    ]
+  },
+  "_mapping_decision_tree_notes": {
+    "Node (function processing State) -- INTERPRETIVE JUDGMENT": "Same disclosed rule as HarnessKG's LangGraph scenario: a Node is mapped to ak:Agent ONLY when it wraps an LLM call (assess_node, escalate_node here); route_check_node (pure logic, no LLM call) is NOT mapped to ak:Agent. This is our design choice, not a LangGraph-enforced distinction.",
+    "Edge (connects Nodes, sequential or conditional)": "THIRD INDEPENDENT CONFIRMATION: maps directly to dependsOn (Task -> Task), when each Node's unit of work is modeled as a Task. This is the third framework (after CrewAI's Process and AutoGen's GroupChatManager) whose native orchestration primitive lands cleanly on AgentCoordKG's dependsOn relation rather than requiring any HarnessKG vocabulary.",
+    "State (TypedDict shared data)": "NO AgentCoordKG equivalent -- State is HarnessKG's territory (maps to hk:Memory there). This is the second independent confirmation (after CrewAI's Crew-level memory=True) that a framework's memory-flavored primitive has no home in AgentCoordKG, while its orchestration-flavored primitives (Edge here) do -- reinforcing the same clean division of labor.",
+    "Checkpointer (cross-session State persistence)": "NO AgentCoordKG equivalent, same reasoning as State above -- belongs to HarnessKG.",
+    "Conditional Edge routing outcome (risk_flagged)": "Interpreted (not native to LangGraph) as triggering ak:Decision -- same treatment as HarnessKG's LangGraph scenario and consistent with the task-outcome Decisions found in AgentCoordKG's other framework scenarios.",
+    "risk_flag=True condition (assessment identifies a problem)": "Interpreted (not native to LangGraph) as violatesConstraint -> Conflict, consistent with the interpretive pattern used across all AgentCoordKG framework scenarios so far."
+  },
+  "instances": [
+    {
+      "id": "AssessAgent_LG2",
+      "type": "Agent",
+      "label": "LangGraph assess_node (wraps LLM call)"
+    },
+    {
+      "id": "EscalateAgent_LG2",
+      "type": "Agent",
+      "label": "LangGraph escalate_node (wraps LLM call)"
+    },
+    {
+      "id": "GraphRuntimeEnvironment_LG2",
+      "type": "Environment",
+      "label": "LangGraph execution environment"
+    },
+    {
+      "id": "AssessTask_LG2",
+      "type": "Task",
+      "label": "Initial risk assessment task",
+      "status": "conflicted",
+      "partOfWorkflow": "approval-routing-workflow",
+      "derivedFromCitation": "16"
+    },
+    {
+      "id": "EscalateTask_LG2",
+      "type": "Task",
+      "label": "Escalated handling task after conditional routing",
+      "status": "completed",
+      "partOfWorkflow": "approval-routing-workflow",
+      "derivedFromCitation": "24"
+    },
+    {
+      "id": "RiskConstraint_LG2",
+      "type": "Constraint",
+      "label": "Requests must not exceed acceptable risk threshold"
+    },
+    {
+      "id": "RiskConflict_LG2",
+      "type": "Conflict",
+      "label": "Risk threshold exceeded during assessment",
+      "conflictType": "risk_threshold_violation",
+      "rationale": "assess_node's risk_flag was set to true, indicating the request exceeded the acceptable risk threshold."
+    },
+    {
+      "id": "RoutingMessage_LG2",
+      "type": "Message",
+      "label": "Routing outcome message: escalate",
+      "performative": "inform"
+    },
+    {
+      "id": "RoutingDecision_LG2",
+      "type": "Decision",
+      "label": "Conditional Edge routing outcome: escalate (interpreted, not native to LangGraph)"
+    }
+  ],
+  "relations": [
+    {
+      "subject": "AssessAgent_LG2",
+      "property": "actsWithin",
+      "object": "GraphRuntimeEnvironment_LG2"
+    },
+    {
+      "subject": "EscalateAgent_LG2",
+      "property": "actsWithin",
+      "object": "GraphRuntimeEnvironment_LG2"
+    },
+    {
+      "subject": "AssessTask_LG2",
+      "property": "assignedTo",
+      "object": "AssessAgent_LG2"
+    },
+    {
+      "subject": "AssessTask_LG2",
+      "property": "occursIn",
+      "object": "GraphRuntimeEnvironment_LG2"
+    },
+    {
+      "subject": "AssessTask_LG2",
+      "property": "violatesConstraint",
+      "object": "RiskConstraint_LG2"
+    },
+    {
+      "subject": "RiskConflict_LG2",
+      "property": "involvesAgent",
+      "object": "AssessAgent_LG2"
+    },
+    {
+      "subject": "RiskConflict_LG2",
+      "property": "involvesAgent",
+      "object": "EscalateAgent_LG2"
+    },
+    {
+      "subject": "EscalateTask_LG2",
+      "property": "resolvesConflict",
+      "object": "RiskConflict_LG2"
+    },
+    {
+      "subject": "EscalateTask_LG2",
+      "property": "dependsOn",
+      "object": "AssessTask_LG2"
+    },
+    {
+      "subject": "EscalateTask_LG2",
+      "property": "assignedTo",
+      "object": "EscalateAgent_LG2"
+    },
+    {
+      "subject": "AssessAgent_LG2",
+      "property": "delegatesTask",
+      "object": "EscalateTask_LG2"
+    },
+    {
+      "subject": "EscalateAgent_LG2",
+      "property": "sendsMessage",
+      "object": "RoutingMessage_LG2"
+    },
+    {
+      "subject": "RoutingMessage_LG2",
+      "property": "supportsDecision",
+      "object": "RoutingDecision_LG2"
+    }
+  ],
+  "story_summary": "A LangGraph node assesses an incoming request and flags it as too risky, creating a conflict. The flagged request is then routed to an escalation node, which handles it and produces the routing decision."
+}

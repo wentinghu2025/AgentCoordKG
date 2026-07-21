@@ -1,0 +1,177 @@
+{
+  "scenario_name": "CrewAI-style Content Production Crew — Case 2 for AgentCoordKG",
+  "description": "Hand-authored scenario following CrewAI's real Agent/Task/Process/allow_delegation schema (confirmed via official CrewAI documentation), NOT a live CrewAI run. Demonstrates AgentCoordKG's coverage of a real framework's native coordination schema, and surfaces a key symmetric finding: CrewAI's Process (sequential task ordering) and allow_delegation mechanisms -- which HarnessKG's Existing-KG Decision Tree explicitly judged out of scope, belonging to AgentCoordKG -- map DIRECTLY onto AgentCoordKG's dependsOn and delegatesTask relations, confirming the intended division of labor between the two companion ontologies.",
+  "_crewai_native_log": {
+    "_comment": "Mimics a real CrewAI crew configuration using CrewAI's actual concepts (Agent role/goal/backstory, Task.context chaining, Process=sequential, allow_delegation). Not itself part of the RDF instance data.",
+    "agents": [
+      {
+        "role": "Content Writer",
+        "goal": "Draft articles",
+        "backstory": "Experienced writer.",
+        "allow_delegation": true
+      },
+      {
+        "role": "Senior Editor",
+        "goal": "Review and finalize articles",
+        "backstory": "Senior editorial lead."
+      }
+    ],
+    "tasks": [
+      {
+        "description": "Write draft article on topic X",
+        "agent": "Content Writer",
+        "tools": [
+          "web_search"
+        ]
+      },
+      {
+        "description": "Review and approve draft",
+        "agent": "Senior Editor",
+        "context": "output_of_previous_task"
+      }
+    ],
+    "crew_config": {
+      "process": "sequential",
+      "memory": true
+    }
+  },
+  "_mapping_decision_tree_notes": {
+    "Agent (role, goal, backstory)": "Maps directly to ak:Agent, with 'role' captured via hasRole -- no ontology change needed.",
+    "Task (description, expected_output)": "Maps directly to ak:Task -- no ontology change needed.",
+    "Task.agent (assignment)": "Maps directly to assignedTo (Task -> Agent).",
+    "Process=sequential (task ordering)": "SYMMETRIC FINDING: maps directly to dependsOn (Task -> Task). HarnessKG's Existing-KG Decision Tree explicitly judged CrewAI's Process as out-of-scope, belonging to AgentCoordKG's Task.dependsOn territory -- this scenario confirms that judgment by showing Process maps cleanly here.",
+    "allow_delegation (agent hands a task to another agent)": "SYMMETRIC FINDING: maps directly to delegatesTask (Agent -> Task). HarnessKG's Decision Tree likewise flagged CrewAI's Delegation as AgentCoordKG territory -- confirmed here as a direct, clean match.",
+    "Task.tools (e.g. web_search)": "Maps directly to Task.usesTool (datatype property) -- no ontology change needed.",
+    "Task.context (prior task output referenced by a later task)": "Interpreted (not native to CrewAI) as an implicit Message-passing mechanism -- CrewAI has no explicit Message primitive; task-to-task context chaining is our semantic interpretation, disclosed as such.",
+    "Crew-level memory=True (cross-task memory coordination)": "NO AgentCoordKG equivalent -- AgentCoordKG has no Memory or Harness-like coordinating-container class; this functionality belongs entirely to the companion HarnessKG ontology (where Crew's memory role would map to Harness+coordinatesMemory). This is the clean counterpart to the Process/Delegation findings above: CrewAI's coordination-flavored features map to AgentCoordKG, while its memory-flavored features map to HarnessKG -- confirming a clean division of labor discovered from the framework's own native schema, not asserted a priori.",
+    "Delegation under role/capacity mismatch": "Interpreted (not native to CrewAI) as violatesConstraint -> Conflict, consistent with the same interpretive treatment used in the illustrative AgentCoordKG scenario.",
+    "Acceptance of the Senior Editor's final review": "Interpreted (not native to CrewAI) as triggering ak:Decision -- same treatment as the task-output-acceptance Decisions found in HarnessKG's AutoGen/CrewAI/LangGraph/MetaGPT scenarios."
+  },
+  "instances": [
+    {
+      "id": "WriterAgent_CA2",
+      "type": "Agent",
+      "label": "CrewAI Content Writer (role field)",
+      "hasRole": "writer"
+    },
+    {
+      "id": "EditorAgent_CA2",
+      "type": "Agent",
+      "label": "CrewAI Senior Editor (role field)",
+      "hasRole": "editor"
+    },
+    {
+      "id": "CrewRuntimeEnvironment",
+      "type": "Environment",
+      "label": "CrewAI shared crew execution context"
+    },
+    {
+      "id": "DraftTask_CA2",
+      "type": "Task",
+      "label": "Write draft article task",
+      "status": "delegated",
+      "usesTool": "web_search",
+      "partOfWorkflow": "content-production-workflow",
+      "derivedFromCitation": "45"
+    },
+    {
+      "id": "ReviewTask_CA2",
+      "type": "Task",
+      "label": "Review and approve draft task",
+      "status": "completed",
+      "partOfWorkflow": "content-production-workflow",
+      "derivedFromCitation": "24"
+    },
+    {
+      "id": "DraftMessage_CA2",
+      "type": "Message",
+      "label": "Task.context: draft output passed to review task (interpreted)",
+      "performative": "inform"
+    },
+    {
+      "id": "RoleCompatibilityConstraint",
+      "type": "Constraint",
+      "label": "Delegated tasks must match recipient agent's role"
+    },
+    {
+      "id": "DelegationConflict_CA2",
+      "type": "Conflict",
+      "label": "Role mismatch conflict on initial delegation attempt",
+      "conflictType": "role_mismatch",
+      "rationale": "The task was initially delegated to an agent whose declared role did not match the task's requirements."
+    },
+    {
+      "id": "ApprovalDecision_CA2",
+      "type": "Decision",
+      "label": "Senior Editor's decision to approve the final draft (interpreted, not native to CrewAI)"
+    }
+  ],
+  "relations": [
+    {
+      "subject": "WriterAgent_CA2",
+      "property": "actsWithin",
+      "object": "CrewRuntimeEnvironment"
+    },
+    {
+      "subject": "EditorAgent_CA2",
+      "property": "actsWithin",
+      "object": "CrewRuntimeEnvironment"
+    },
+    {
+      "subject": "WriterAgent_CA2",
+      "property": "delegatesTask",
+      "object": "DraftTask_CA2"
+    },
+    {
+      "subject": "DraftTask_CA2",
+      "property": "assignedTo",
+      "object": "WriterAgent_CA2"
+    },
+    {
+      "subject": "DraftTask_CA2",
+      "property": "occursIn",
+      "object": "CrewRuntimeEnvironment"
+    },
+    {
+      "subject": "DraftTask_CA2",
+      "property": "violatesConstraint",
+      "object": "RoleCompatibilityConstraint"
+    },
+    {
+      "subject": "DelegationConflict_CA2",
+      "property": "involvesAgent",
+      "object": "WriterAgent_CA2"
+    },
+    {
+      "subject": "DelegationConflict_CA2",
+      "property": "involvesAgent",
+      "object": "EditorAgent_CA2"
+    },
+    {
+      "subject": "ReviewTask_CA2",
+      "property": "resolvesConflict",
+      "object": "DelegationConflict_CA2"
+    },
+    {
+      "subject": "ReviewTask_CA2",
+      "property": "dependsOn",
+      "object": "DraftTask_CA2"
+    },
+    {
+      "subject": "ReviewTask_CA2",
+      "property": "assignedTo",
+      "object": "EditorAgent_CA2"
+    },
+    {
+      "subject": "EditorAgent_CA2",
+      "property": "sendsMessage",
+      "object": "DraftMessage_CA2"
+    },
+    {
+      "subject": "DraftMessage_CA2",
+      "property": "supportsDecision",
+      "object": "ApprovalDecision_CA2"
+    }
+  ],
+  "story_summary": "A CrewAI Content Writer is delegated an article to draft, but the task is initially assigned to an editor whose role doesn't match -- a role-mismatch conflict. The article is then routed to the Senior Editor, who reviews and approves it."
+}

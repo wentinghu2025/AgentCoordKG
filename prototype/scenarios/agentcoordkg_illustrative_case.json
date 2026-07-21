@@ -1,0 +1,133 @@
+{
+  "scenario_name": "Task Delegation with Conflict Resolution — Illustrative Case for AgentCoordKG",
+  "description": "A hand-authored minimal scenario demonstrating how AgentCoordKG's 7 core classes and 10 object properties instantiate in a concrete multi-agent coordination case: task delegation, a constraint violation triggering a conflict, and its resolution via task reassignment.",
+  "instances": [
+    {
+      "id": "AgentA",
+      "type": "Agent",
+      "label": "Coordinator Agent",
+      "hasRole": "coordinator"
+    },
+    {
+      "id": "AgentB",
+      "type": "Agent",
+      "label": "Worker Agent",
+      "hasRole": "worker"
+    },
+    {
+      "id": "SharedWorkEnvironment",
+      "type": "Environment",
+      "label": "Shared coordination workspace"
+    },
+    {
+      "id": "RequestMessage001",
+      "type": "Message",
+      "label": "Task delegation request",
+      "performative": "request",
+      "derivedFromCitation": "16"
+    },
+    {
+      "id": "OriginalTask001",
+      "type": "Task",
+      "label": "Original task assignment",
+      "status": "conflicted",
+      "partOfWorkflow": "report-generation-workflow",
+      "derivedFromCitation": "16"
+    },
+    {
+      "id": "ReassignedTask001",
+      "type": "Task",
+      "label": "Reassigned task after conflict resolution",
+      "status": "completed",
+      "partOfWorkflow": "report-generation-workflow",
+      "derivedFromCitation": "16"
+    },
+    {
+      "id": "CapacityConstraint001",
+      "type": "Constraint",
+      "label": "Agent workload capacity constraint",
+      "derivedFromCitation": "21"
+    },
+    {
+      "id": "Conflict001",
+      "type": "Conflict",
+      "label": "Overload conflict on AgentB",
+      "conflictType": "capacity_violation",
+      "rationale": "AgentB was already assigned two concurrent tasks exceeding its declared capacity.",
+      "derivedFromCitation": "21"
+    },
+    {
+      "id": "ReassignmentDecision001",
+      "type": "Decision",
+      "label": "Decision to accept reassignment to AgentB"
+    }
+  ],
+  "relations": [
+    {
+      "subject": "AgentA",
+      "property": "sendsMessage",
+      "object": "RequestMessage001"
+    },
+    {
+      "subject": "AgentA",
+      "property": "actsWithin",
+      "object": "SharedWorkEnvironment"
+    },
+    {
+      "subject": "AgentB",
+      "property": "actsWithin",
+      "object": "SharedWorkEnvironment"
+    },
+    {
+      "subject": "AgentA",
+      "property": "delegatesTask",
+      "object": "OriginalTask001"
+    },
+    {
+      "subject": "OriginalTask001",
+      "property": "assignedTo",
+      "object": "AgentB"
+    },
+    {
+      "subject": "OriginalTask001",
+      "property": "occursIn",
+      "object": "SharedWorkEnvironment"
+    },
+    {
+      "subject": "OriginalTask001",
+      "property": "violatesConstraint",
+      "object": "CapacityConstraint001"
+    },
+    {
+      "subject": "Conflict001",
+      "property": "involvesAgent",
+      "object": "AgentA"
+    },
+    {
+      "subject": "Conflict001",
+      "property": "involvesAgent",
+      "object": "AgentB"
+    },
+    {
+      "subject": "ReassignedTask001",
+      "property": "resolvesConflict",
+      "object": "Conflict001"
+    },
+    {
+      "subject": "ReassignedTask001",
+      "property": "dependsOn",
+      "object": "OriginalTask001"
+    },
+    {
+      "subject": "ReassignedTask001",
+      "property": "assignedTo",
+      "object": "AgentB"
+    },
+    {
+      "subject": "RequestMessage001",
+      "property": "supportsDecision",
+      "object": "ReassignmentDecision001"
+    }
+  ],
+  "story_summary": "Agent A delegates a task to Agent B. The task turns out to exceed Agent B's workload capacity, creating a conflict between the two agents. A reassigned task resolves the conflict, and a message about the reassignment supports the final decision to accept it."
+}

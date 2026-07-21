@@ -1,0 +1,212 @@
+@prefix ns: <https://example.org/agentcoordkg#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://example.org/agentcoordkg> a owl:Ontology ;
+    rdfs:label "AgentCoordKG" ;
+    rdfs:comment "An ontology-grounded coordination model for multi-agent LLM systems, covering Agent, Task, Message, Decision, Conflict, Constraint, and Environment as core concepts. Core classes and properties are locked per M2 (2026-07-17/18), derived from evidence-based analysis of 6 independent literature reviews (188 citations, Poster2+Both scope). Shares Agent, Environment, and Decision with the companion ontology HarnessKG." .
+
+ns:RevisedItineraryTask a ns:Task ;
+    rdfs:label "Revise itinerary to fit budget" ;
+    prov:wasDerivedFrom ns:Citation_24 ;
+    ns:assignedTo ns:SchedulingAgent ;
+    ns:dependsOn ns:ItineraryTask ;
+    ns:partOfWorkflow "trip-planning-workflow"^^xsd:string ;
+    ns:resolvesConflict ns:BudgetConflict ;
+    ns:status "completed"^^xsd:string .
+
+ns:actsWithin a owl:ObjectProperty ;
+    rdfs:label "actsWithin" ;
+    rdfs:comment "An Agent perceives and acts within an Environment. Added 2026-07-18: identical name and semantics to HarnessKG's actsWithin, confirming Environment as a genuinely shared core concept between the two ontologies. Grounded in 5 independent citations from the Poster2+Both corpus explicitly describing Agent-Environment interaction (operating in, sensing, acting on, receiving context from, being regulated by a shared environment) that were not covered by any existing AgentCoordKG property (occursIn's domain is Task/Message, not Agent)." ;
+    rdfs:domain ns:Agent ;
+    rdfs:range ns:Environment .
+
+ns:assignedTo a owl:ObjectProperty ;
+    rdfs:label "assignedTo" ;
+    rdfs:comment "The Agent responsible for carrying out a Task." ;
+    rdfs:domain ns:Task ;
+    rdfs:range ns:Agent .
+
+ns:conflictType a owl:DatatypeProperty ;
+    rdfs:label "conflictType" ;
+    rdfs:comment "Category of the detected conflict (e.g. contradictory_assignment, constraint_violation). Adapted from MA-Ontology's conflictTypeEvent pattern." ;
+    rdfs:domain ns:Conflict ;
+    rdfs:range xsd:string .
+
+ns:delegatesTask a owl:ObjectProperty ;
+    rdfs:label "delegatesTask" ;
+    rdfs:comment "An Agent delegates a Task, addressing the competency question of task-origin traceability." ;
+    rdfs:domain ns:Agent ;
+    rdfs:range ns:Task .
+
+ns:dependsOn a owl:ObjectProperty ;
+    rdfs:label "dependsOn" ;
+    rdfs:comment "Task-to-Task dependency relation, supporting workflow-grouping competency questions." ;
+    rdfs:domain ns:Task ;
+    rdfs:range ns:Task .
+
+ns:hasCapability a owl:DatatypeProperty ;
+    rdfs:label "hasCapability" ;
+    rdfs:comment "Downgraded from a candidate Capability class per M2 minimality decision, parallel treatment to hasRole (3/6 reviews)." ;
+    rdfs:domain ns:Agent ;
+    rdfs:range xsd:string .
+
+ns:hasRole a owl:DatatypeProperty ;
+    rdfs:label "hasRole" ;
+    rdfs:comment "Downgraded from a candidate Role class per M2 minimality decision: a descriptive attribute of Agent, not an independent entity (3/6 reviews, insufficient evidence for Class status)." ;
+    rdfs:domain ns:Agent ;
+    rdfs:range xsd:string .
+
+ns:involvesAgent a owl:ObjectProperty ;
+    rdfs:label "involvesAgent" ;
+    rdfs:comment "Which Agent(s) are party to a detected Conflict. Adapted from MA-Ontology's involvesAgentsEvent pattern." ;
+    rdfs:domain ns:Conflict ;
+    rdfs:range ns:Agent .
+
+ns:occursIn a owl:ObjectProperty ;
+    rdfs:label "occursIn" ;
+    rdfs:comment "The Environment within which a Task or Message occurs. Reuses the same semantic pattern as HarnessKG's actsWithin (Agent -> Environment), applied here to Task/Message rather than Agent directly." ;
+    rdfs:domain ns:Task ;
+    rdfs:range ns:Environment .
+
+ns:partOfWorkflow a owl:DatatypeProperty ;
+    rdfs:label "partOfWorkflow" ;
+    rdfs:comment "Workflow-grouping identifier. Downgraded from a candidate Workflow class per M2 minimality decision." ;
+    rdfs:domain ns:Task ;
+    rdfs:range xsd:string .
+
+ns:performative a owl:DatatypeProperty ;
+    rdfs:label "performative" ;
+    rdfs:comment "Speech-act type of a Message. Enumerated values reference FIPA-ACL categories (request | inform | agree | refuse | propose); example protocol-identifier values observed in the evidence corpus include MCP and A2A, treated as Individuals of this datatype value space rather than separate classes." ;
+    rdfs:domain ns:Message ;
+    rdfs:range xsd:string .
+
+ns:producesArtifact a owl:DatatypeProperty ;
+    rdfs:label "producesArtifact" ;
+    rdfs:comment "Output identifier produced by a Task. Downgraded to a Datatype Property (not the richer HarnessKG Artifact class) to keep AgentCoordKG's scope focused on coordination semantics rather than knowledge-provenance semantics, which is HarnessKG's territory." ;
+    rdfs:domain ns:Task ;
+    rdfs:range xsd:string .
+
+ns:rationale a owl:DatatypeProperty ;
+    rdfs:label "rationale" ;
+    rdfs:comment "Natural-language explanation of why a Conflict was detected or how it should be resolved. Adapted from MA-Ontology's selectionRationale pattern (ConflictAlert.selectionRationale)." ;
+    rdfs:domain ns:Conflict ;
+    rdfs:range xsd:string .
+
+ns:resolvesConflict a owl:ObjectProperty ;
+    rdfs:label "resolvesConflict" ;
+    rdfs:comment "A Task (or Decision) resolves a previously detected Conflict, closing the governance loop violatesConstraint -> Conflict -> resolvesConflict. Directly adapted from Muppasani et al.'s MA-Ontology 'resolvesConflict' pattern (ma:ResolvedSubPlan ma:resolvesConflict ma:CollisionEvent)." ;
+    rdfs:domain ns:Task ;
+    rdfs:range ns:Conflict .
+
+ns:sendsMessage a owl:ObjectProperty ;
+    rdfs:label "sendsMessage" ;
+    rdfs:comment "Basic communication relation between an Agent and a Message it sends." ;
+    rdfs:domain ns:Agent ;
+    rdfs:range ns:Message .
+
+ns:status a owl:DatatypeProperty ;
+    rdfs:label "status" ;
+    rdfs:comment "Downgraded from a candidate State class per M2 minimality decision." ;
+    rdfs:domain ns:Task ;
+    rdfs:range xsd:string .
+
+ns:supportsDecision a owl:ObjectProperty ;
+    rdfs:label "supportsDecision" ;
+    rdfs:comment "Shared relation name and semantics with HarnessKG's supportsDecision: a Message or Task provides grounds for a coordination Decision. Domain axiom lists Message; Task-originated support is also a valid instance of this relation even though not separately axiomatized, consistent with the same simplification disclosed for HarnessKG's generatesArtifact." ;
+    rdfs:domain ns:Message ;
+    rdfs:range ns:Decision .
+
+ns:usesTool a owl:DatatypeProperty ;
+    rdfs:label "usesTool" ;
+    rdfs:comment "Downgraded from a candidate Tool class per M2 minimality decision." ;
+    rdfs:domain ns:Task ;
+    rdfs:range xsd:string .
+
+ns:violatesConstraint a owl:ObjectProperty ;
+    rdfs:label "violatesConstraint" ;
+    rdfs:comment "A Task (or, by the same simplification as above, a Message) violates a governance Constraint, typically triggering a Conflict." ;
+    rdfs:domain ns:Task ;
+    rdfs:range ns:Constraint .
+
+ns:BudgetConflict a ns:Conflict ;
+    rdfs:label "Itinerary cost exceeds traveler's stated budget" ;
+    ns:conflictType "budget_violation"^^xsd:string ;
+    ns:involvesAgent ns:DestinationAgent,
+        ns:SchedulingAgent ;
+    ns:rationale "The initial itinerary's total cost exceeded the budget the traveler specified to DestinationAgent."^^xsd:string .
+
+ns:BudgetConstraint a ns:Constraint ;
+    rdfs:label "Total itinerary cost must not exceed traveler's budget" .
+
+ns:Citation_24 a ns:Citation ;
+    rdfs:label "24" .
+
+ns:Citation_45 a ns:Citation ;
+    rdfs:label "45" .
+
+ns:DestinationAgent a ns:Agent ;
+    rdfs:label "Destination Selection Agent" ;
+    ns:actsWithin ns:TravelPlanningEnvironment ;
+    ns:delegatesTask ns:ItineraryTask ;
+    ns:hasRole "destination_selector"^^xsd:string .
+
+ns:ItineraryApprovalDecision a ns:Decision ;
+    rdfs:label "Decision to approve the revised, budget-compliant itinerary" .
+
+ns:ItineraryMessage a ns:Message ;
+    rdfs:label "Revised itinerary summary message" ;
+    ns:performative "inform"^^xsd:string ;
+    ns:supportsDecision ns:ItineraryApprovalDecision .
+
+ns:Constraint a owl:Class ;
+    rdfs:label "Constraint" ;
+    rdfs:comment "A governance rule that a Task or Message can violate, triggering a Conflict. Candidate for future SHACL Shape mapping; retained as an OWL Class for the current Prototype scope." .
+
+ns:Decision a owl:Class ;
+    rdfs:label "Decision" ;
+    rdfs:comment "A coordination-relevant decision (e.g. task acceptance, conflict resolution choice). Shared core concept with HarnessKG: extends prov:Activity with governance-specific semantics not covered by plain PROV-O (7 occurrences, 4/6 independent reviews, corroborated by 'Decision Making' evidence)." ;
+    rdfs:subClassOf prov:Activity .
+
+ns:ItineraryTask a ns:Task ;
+    rdfs:label "Build initial multi-day itinerary" ;
+    prov:wasDerivedFrom ns:Citation_45 ;
+    ns:assignedTo ns:SchedulingAgent ;
+    ns:occursIn ns:TravelPlanningEnvironment ;
+    ns:partOfWorkflow "trip-planning-workflow"^^xsd:string ;
+    ns:status "conflicted"^^xsd:string ;
+    ns:violatesConstraint ns:BudgetConstraint .
+
+ns:Environment a owl:Class ;
+    rdfs:label "Environment" ;
+    rdfs:comment "The shared context within which Agents coordinate. Shared core concept with HarnessKG -- independently confirmed as the strongest cross-poster evidence (13 occurrences, 5/6 independent reviews in the Poster2+Both scope; 10 occurrences, 5/6 in Poster1+Both), making Agent and Environment the two genuinely shared concepts across both ontologies." ;
+    rdfs:subClassOf prov:Entity .
+
+ns:SchedulingAgent a ns:Agent ;
+    rdfs:label "Itinerary Scheduling Agent" ;
+    ns:actsWithin ns:TravelPlanningEnvironment ;
+    ns:hasRole "scheduler"^^xsd:string ;
+    ns:sendsMessage ns:ItineraryMessage .
+
+ns:TravelPlanningEnvironment a ns:Environment ;
+    rdfs:label "Trip planning shared workspace" .
+
+ns:Message a owl:Class ;
+    rdfs:label "Message" ;
+    rdfs:comment "A unit of communication sent between Agents. Performative typing (request/inform/agree/refuse etc.) is captured via the datatype property 'performative', with values referencing FIPA-ACL speech-act categories rather than reusing fipa:ACLMessage directly as a class alignment." .
+
+ns:Conflict a owl:Class ;
+    rdfs:label "Conflict" ;
+    rdfs:comment "An event representing a detected coordination conflict (e.g. contradictory task assignments, constraint violations). Perdurant/event-type concept per OntoClean Temporal Nature criterion, but retained as a Class (not merely a property) because it must carry multiple attributes (conflictType, involvesAgent, rationale) and participate in a governance closure loop (violatesConstraint -> Conflict -> resolvesConflict), consistent with the MA-Ontology CollisionEvent/ConflictAlert design pattern (Muppasani et al.)." .
+
+ns:Agent a owl:Class ;
+    rdfs:label "Agent" ;
+    rdfs:comment "Any LLM agent participating in multi-agent coordination. Shared core concept with HarnessKG (58 occurrences, 4/6 independent reviews: Liu/Ke/Tran/Wei)." ;
+    rdfs:subClassOf prov:Agent .
+
+ns:Task a owl:Class ;
+    rdfs:label "Task" ;
+    rdfs:comment "A unit of work delegated to, assigned to, or performed by an Agent. No direct PROV-O equivalent -- prov:Activity conflates the assignment/definition of a task with the act of executing it, whereas Task here is the coordination-relevant object of delegation/assignment/dependency. Core AgentCoordKG-specific contribution, not shared with HarnessKG." .
+

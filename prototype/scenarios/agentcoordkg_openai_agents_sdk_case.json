@@ -1,0 +1,188 @@
+{
+  "scenario_name": "OpenAI Agents SDK-style Triage Handoff — Case 6 for AgentCoordKG",
+  "description": "Hand-authored scenario following OpenAI Agents SDK's real Agent/Handoffs/Guardrails/Sessions schema (confirmed via official documentation), NOT a live SDK run. This is the fifth and final framework studied for AgentCoordKG, mirroring the five frameworks studied for HarnessKG. Provides a second independent confirmation that an explicit hand-off/delegation primitive (Handoffs, after CrewAI's allow_delegation) maps directly onto delegatesTask, and a fourth confirmation that a framework's persistent-memory primitive (Sessions) has no AgentCoordKG equivalent.",
+  "_openai_agents_sdk_native_log": {
+    "_comment": "Mimics a real OpenAI Agents SDK run with a triage agent handing off to a billing specialist, using the SDK's actual primitives (Agent, handoff, input_guardrail, Session). Not itself part of the RDF instance data.",
+    "triage_agent": {
+      "name": "TriageAgent",
+      "instructions": "Classify the request and hand off to the right specialist."
+    },
+    "billing_agent": {
+      "name": "BillingAgent",
+      "instructions": "Handle billing disputes.",
+      "tools": [
+        "refund_lookup"
+      ]
+    },
+    "guardrail": {
+      "name": "billing_input_guardrail",
+      "type": "input_guardrail",
+      "checks": "is this actually a billing-related request?"
+    },
+    "session": {
+      "description": "Persistent memory layer maintaining working context across the handoff"
+    },
+    "run_trace": [
+      {
+        "step": "triage_classification",
+        "result": "billing"
+      },
+      {
+        "step": "handoff",
+        "from": "TriageAgent",
+        "to": "BillingAgent"
+      },
+      {
+        "step": "input_guardrail_check",
+        "result": "fail",
+        "tripwire_triggered": true,
+        "reason": "request lacked a valid account identifier"
+      },
+      {
+        "step": "corrected_handoff",
+        "from": "BillingAgent",
+        "to": "BillingAgent",
+        "note": "re-run after requesting account ID"
+      },
+      {
+        "step": "agent_output",
+        "content": "Refund of $42.00 approved for account #1183."
+      }
+    ]
+  },
+  "_mapping_decision_tree_notes": {
+    "Agent (instructions, tools)": "Maps directly to ak:Agent -- no ontology change needed.",
+    "Handoffs (control transferred to a specialist agent, not a function call)": "SECOND INDEPENDENT CONFIRMATION: maps directly to delegatesTask (Agent -> Task), joining CrewAI's allow_delegation as the second framework whose explicit hand-off/delegation primitive lands cleanly on this relation (distinct from the four dependsOn confirmations, which concern task ORDERING rather than delegation of RESPONSIBILITY).",
+    "Tools (e.g. refund_lookup)": "Maps to Task.usesTool (datatype property).",
+    "Input Guardrail tripwire (missing account identifier)": "Interpreted (not native to the SDK in this exact form) as violatesConstraint -> Conflict -- the guardrail's compliance check is modeled as a Constraint that the initial handling Task violates, consistent with the governance-flavored Decision variant already noted in HarnessKG's OpenAI Agents SDK scenario, but here operationalized one step earlier as the Conflict-detection event itself.",
+    "Corrected re-run after guardrail failure": "Maps to resolvesConflict (Task -> Conflict), consistent with the same resolution pattern used in all other AgentCoordKG framework scenarios.",
+    "Sessions (persistent memory layer)": "NO AgentCoordKG equivalent -- fourth independent confirmation (after CrewAI's Crew.memory=True, LangGraph's State/Checkpointer, MetaGPT's Memory) that a framework's persistent-memory primitive belongs entirely to HarnessKG (where Sessions would map directly to hk:Memory, as already confirmed in HarnessKG's own OpenAI Agents SDK scenario), never to AgentCoordKG.",
+    "Runner (executes the agent loop)": "NO AgentCoordKG equivalent -- AgentCoordKG has no orchestrating-container class analogous to HarnessKG's Harness; consistent with the same gap noted for CrewAI's Crew.",
+    "Final refund approval output": "Interpreted (not native to the SDK) as triggering ak:Decision, consistent with the task-outcome Decisions found across all five AgentCoordKG framework scenarios."
+  },
+  "instances": [
+    {
+      "id": "TriageAgent_OAI2",
+      "type": "Agent",
+      "label": "OpenAI Agents SDK TriageAgent"
+    },
+    {
+      "id": "BillingAgent_OAI2",
+      "type": "Agent",
+      "label": "OpenAI Agents SDK BillingAgent"
+    },
+    {
+      "id": "SDKRuntimeEnvironment_OAI2",
+      "type": "Environment",
+      "label": "OpenAI Agents SDK runtime environment"
+    },
+    {
+      "id": "InitialHandlingTask_OAI2",
+      "type": "Task",
+      "label": "Initial billing request handling (pre-guardrail-failure)",
+      "status": "conflicted",
+      "usesTool": "refund_lookup",
+      "partOfWorkflow": "billing-triage-workflow",
+      "derivedFromCitation": "16"
+    },
+    {
+      "id": "CorrectedHandlingTask_OAI2",
+      "type": "Task",
+      "label": "Corrected handling after account ID requested",
+      "status": "completed",
+      "partOfWorkflow": "billing-triage-workflow",
+      "derivedFromCitation": "24"
+    },
+    {
+      "id": "ValidAccountConstraint_OAI2",
+      "type": "Constraint",
+      "label": "Billing requests must include a valid account identifier"
+    },
+    {
+      "id": "GuardrailConflict_OAI2",
+      "type": "Conflict",
+      "label": "Input guardrail tripwire: missing account identifier",
+      "conflictType": "guardrail_tripwire",
+      "rationale": "The input guardrail flagged the request for lacking a valid account identifier, triggering tripwire_triggered=true."
+    },
+    {
+      "id": "RefundMessage_OAI2",
+      "type": "Message",
+      "label": "Final refund approval output message",
+      "performative": "inform"
+    },
+    {
+      "id": "RefundDecision_OAI2",
+      "type": "Decision",
+      "label": "Decision to approve the $42.00 refund (interpreted, not native to the SDK)"
+    }
+  ],
+  "relations": [
+    {
+      "subject": "TriageAgent_OAI2",
+      "property": "actsWithin",
+      "object": "SDKRuntimeEnvironment_OAI2"
+    },
+    {
+      "subject": "BillingAgent_OAI2",
+      "property": "actsWithin",
+      "object": "SDKRuntimeEnvironment_OAI2"
+    },
+    {
+      "subject": "TriageAgent_OAI2",
+      "property": "delegatesTask",
+      "object": "InitialHandlingTask_OAI2"
+    },
+    {
+      "subject": "InitialHandlingTask_OAI2",
+      "property": "assignedTo",
+      "object": "BillingAgent_OAI2"
+    },
+    {
+      "subject": "InitialHandlingTask_OAI2",
+      "property": "occursIn",
+      "object": "SDKRuntimeEnvironment_OAI2"
+    },
+    {
+      "subject": "InitialHandlingTask_OAI2",
+      "property": "violatesConstraint",
+      "object": "ValidAccountConstraint_OAI2"
+    },
+    {
+      "subject": "GuardrailConflict_OAI2",
+      "property": "involvesAgent",
+      "object": "TriageAgent_OAI2"
+    },
+    {
+      "subject": "GuardrailConflict_OAI2",
+      "property": "involvesAgent",
+      "object": "BillingAgent_OAI2"
+    },
+    {
+      "subject": "CorrectedHandlingTask_OAI2",
+      "property": "resolvesConflict",
+      "object": "GuardrailConflict_OAI2"
+    },
+    {
+      "subject": "CorrectedHandlingTask_OAI2",
+      "property": "dependsOn",
+      "object": "InitialHandlingTask_OAI2"
+    },
+    {
+      "subject": "CorrectedHandlingTask_OAI2",
+      "property": "assignedTo",
+      "object": "BillingAgent_OAI2"
+    },
+    {
+      "subject": "BillingAgent_OAI2",
+      "property": "sendsMessage",
+      "object": "RefundMessage_OAI2"
+    },
+    {
+      "subject": "RefundMessage_OAI2",
+      "property": "supportsDecision",
+      "object": "RefundDecision_OAI2"
+    }
+  ],
+  "story_summary": "A Triage agent hands off a billing dispute to a Billing agent, but an automated guardrail flags the request for missing an account ID -- a conflict. After the account ID is obtained, the corrected request is processed and a refund is approved."
+}

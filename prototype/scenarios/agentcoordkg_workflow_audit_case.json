@@ -1,0 +1,130 @@
+{
+  "scenario_name": "Workflow Compliance Audit — Case 8 for AgentCoordKG",
+  "description": "Hand-authored illustrative scenario in a fresh narrative domain (post-hoc workflow auditing), not modeled on any specific external framework. The domain is inspired by the 'agentic AI workflow auditing' use case mentioned in Ekelhart et al.'s AgentO ontology (ESWC 2026), re-designed here to exercise AgentCoordKG's own governance apparatus: an auditor agent detects a compliance violation in a completed workflow step, rather than AgentO's declarative-reconstruction framing of the same general theme.",
+  "instances": [
+    {
+      "id": "ExecutionAgent",
+      "type": "Agent",
+      "label": "Workflow Execution Agent",
+      "hasRole": "executor"
+    },
+    {
+      "id": "AuditorAgent",
+      "type": "Agent",
+      "label": "Compliance Auditor Agent",
+      "hasRole": "auditor"
+    },
+    {
+      "id": "AuditEnvironment",
+      "type": "Environment",
+      "label": "Post-hoc workflow audit workspace"
+    },
+    {
+      "id": "DataAccessTask",
+      "type": "Task",
+      "label": "Access customer records to complete the workflow step",
+      "status": "conflicted",
+      "partOfWorkflow": "compliance-audit-workflow",
+      "derivedFromCitation": "16"
+    },
+    {
+      "id": "RemediationTask",
+      "type": "Task",
+      "label": "Re-run the step with proper access-logging enabled",
+      "status": "completed",
+      "partOfWorkflow": "compliance-audit-workflow",
+      "derivedFromCitation": "45"
+    },
+    {
+      "id": "AccessLoggingConstraint",
+      "type": "Constraint",
+      "label": "All customer-record access must be logged for audit purposes"
+    },
+    {
+      "id": "LoggingConflict",
+      "type": "Conflict",
+      "label": "Customer record access completed without an audit log entry",
+      "conflictType": "compliance_violation",
+      "rationale": "AuditorAgent's post-hoc review found that ExecutionAgent accessed customer records without generating the required audit log entry."
+    },
+    {
+      "id": "AuditFindingMessage",
+      "type": "Message",
+      "label": "Audit finding report message",
+      "performative": "inform"
+    },
+    {
+      "id": "RemediationDecision",
+      "type": "Decision",
+      "label": "Decision to require remediation before workflow sign-off"
+    }
+  ],
+  "relations": [
+    {
+      "subject": "ExecutionAgent",
+      "property": "actsWithin",
+      "object": "AuditEnvironment"
+    },
+    {
+      "subject": "AuditorAgent",
+      "property": "actsWithin",
+      "object": "AuditEnvironment"
+    },
+    {
+      "subject": "AuditorAgent",
+      "property": "delegatesTask",
+      "object": "RemediationTask"
+    },
+    {
+      "subject": "DataAccessTask",
+      "property": "assignedTo",
+      "object": "ExecutionAgent"
+    },
+    {
+      "subject": "DataAccessTask",
+      "property": "occursIn",
+      "object": "AuditEnvironment"
+    },
+    {
+      "subject": "DataAccessTask",
+      "property": "violatesConstraint",
+      "object": "AccessLoggingConstraint"
+    },
+    {
+      "subject": "LoggingConflict",
+      "property": "involvesAgent",
+      "object": "ExecutionAgent"
+    },
+    {
+      "subject": "LoggingConflict",
+      "property": "involvesAgent",
+      "object": "AuditorAgent"
+    },
+    {
+      "subject": "RemediationTask",
+      "property": "resolvesConflict",
+      "object": "LoggingConflict"
+    },
+    {
+      "subject": "RemediationTask",
+      "property": "dependsOn",
+      "object": "DataAccessTask"
+    },
+    {
+      "subject": "RemediationTask",
+      "property": "assignedTo",
+      "object": "ExecutionAgent"
+    },
+    {
+      "subject": "AuditorAgent",
+      "property": "sendsMessage",
+      "object": "AuditFindingMessage"
+    },
+    {
+      "subject": "AuditFindingMessage",
+      "property": "supportsDecision",
+      "object": "RemediationDecision"
+    }
+  ],
+  "story_summary": "A Compliance Auditor reviews a completed workflow step and finds that customer records were accessed without the required audit log -- a conflict. The Execution agent re-runs the step with proper logging, and the audit finding supports the decision to require remediation before sign-off."
+}

@@ -1,0 +1,184 @@
+{
+  "scenario_name": "AutoGen-style Complaint Escalation Coordination — Case 3 for AgentCoordKG",
+  "description": "Hand-authored scenario following AutoGen's real ConversableAgent/Message/GroupChatManager schema (confirmed via official AutoGen/AG2 documentation), NOT a live AutoGen run. Demonstrates AgentCoordKG's coverage of a message-native framework, where Message maps directly (unlike CrewAI's interpreted Task.context mapping) since AutoGen's architecture is natively message-passing.",
+  "_autogen_native_log": {
+    "_comment": "Mimics a real AutoGen chat_history for a two-agent customer complaint escalation exchange, using AutoGen's actual field names. Not itself part of the RDF instance data.",
+    "agents": [
+      {
+        "name": "FrontlineAgent",
+        "system_message": "You handle initial customer complaints and escalate when needed.",
+        "human_input_mode": "NEVER"
+      },
+      {
+        "name": "EscalationAgent",
+        "system_message": "You handle escalated complaints requiring managerial authority.",
+        "human_input_mode": "NEVER"
+      }
+    ],
+    "chat_history": [
+      {
+        "role": "assistant",
+        "name": "FrontlineAgent",
+        "content": "Logging customer complaint about a damaged shipment.",
+        "function_call": {
+          "name": "log_complaint",
+          "arguments": {
+            "case": "damaged_shipment"
+          }
+        }
+      },
+      {
+        "role": "user",
+        "name": "EscalationAgent",
+        "content": "This exceeds the frontline refund authorization limit."
+      },
+      {
+        "role": "assistant",
+        "name": "FrontlineAgent",
+        "content": "Escalating case with full shipment documentation."
+      },
+      {
+        "role": "user",
+        "name": "EscalationAgent",
+        "content": "Full refund authorized. TERMINATE."
+      }
+    ],
+    "group_chat_manager": {
+      "description": "Coordinates turn-taking between FrontlineAgent and EscalationAgent"
+    }
+  },
+  "_mapping_decision_tree_notes": {
+    "ConversableAgent (name, system_message)": "Maps directly to ak:Agent -- no ontology change needed.",
+    "Message (content, role, name)": "Maps directly to ak:Message -- this is the cleanest Message mapping found across the frameworks studied so far, since AutoGen's architecture is natively message-passing (unlike CrewAI, where Message required an interpretive mapping via Task.context).",
+    "initiate_chat / turn-taking (agent sends a message to another)": "Maps directly to sendsMessage (Agent -> Message).",
+    "function_call (tool invocation within a message)": "Maps to Task.usesTool (datatype property) once the invoked action is modeled as a Task -- consistent with the same tool-invocation-detail limitation noted in HarnessKG's AutoGen scenario (argument-level detail not separately representable).",
+    "GroupChatManager (coordinates turn order between agents)": "Maps to dependsOn (Task -> Task) when each conversational turn is modeled as a Task in sequence -- a new, AutoGen-specific confirmation of the same Process/dependsOn correspondence found in CrewAI's scenario, reinforcing that turn-management/orchestration primitives across different frameworks consistently land on AgentCoordKG's coordination vocabulary rather than HarnessKG's.",
+    "'TERMINATE' final message signaling refund approval": "Interpreted (not native to AutoGen) as triggering ak:Decision -- same treatment as HarnessKG's AutoGen scenario's use of 'TERMINATE', and consistent with the task-output-acceptance Decisions found in AgentCoordKG's illustrative and CrewAI scenarios.",
+    "Escalation agent flagging an authorization-limit breach": "Interpreted (not native to AutoGen) as violatesConstraint -> Conflict -- AutoGen has no native constraint/conflict-detection primitive; this is our semantic interpretation of a review-feedback exchange, disclosed as such."
+  },
+  "instances": [
+    {
+      "id": "FrontlineAgent_AG3",
+      "type": "Agent",
+      "label": "AutoGen FrontlineAgent (name field)"
+    },
+    {
+      "id": "EscalationAgent_AG3",
+      "type": "Agent",
+      "label": "AutoGen EscalationAgent (name field)"
+    },
+    {
+      "id": "SupportEnvironment_AG3",
+      "type": "Environment",
+      "label": "AutoGen chat runtime environment"
+    },
+    {
+      "id": "LogComplaintTask_AG3",
+      "type": "Task",
+      "label": "Log and process damaged-shipment complaint (initial turn)",
+      "status": "conflicted",
+      "usesTool": "log_complaint",
+      "partOfWorkflow": "complaint-escalation-workflow",
+      "derivedFromCitation": "16"
+    },
+    {
+      "id": "EscalateComplaintTask_AG3",
+      "type": "Task",
+      "label": "Escalate case with full documentation (subsequent turn)",
+      "status": "completed",
+      "partOfWorkflow": "complaint-escalation-workflow",
+      "derivedFromCitation": "24"
+    },
+    {
+      "id": "RefundLimitConstraint_AG3",
+      "type": "Constraint",
+      "label": "Frontline refund authorization must not exceed the delegated limit"
+    },
+    {
+      "id": "AuthorizationConflict_AG3",
+      "type": "Conflict",
+      "label": "Refund request exceeds frontline authorization limit",
+      "conflictType": "authorization_limit_violation",
+      "rationale": "EscalationAgent determined that the requested refund exceeded FrontlineAgent's authorization limit."
+    },
+    {
+      "id": "RefundMessage_AG3",
+      "type": "Message",
+      "label": "'Full refund authorized. TERMINATE.' message",
+      "performative": "inform"
+    },
+    {
+      "id": "RefundApprovalDecision_AG3",
+      "type": "Decision",
+      "label": "EscalationAgent's refund approval decision, triggered by TERMINATE (interpreted, not native to AutoGen)"
+    }
+  ],
+  "relations": [
+    {
+      "subject": "FrontlineAgent_AG3",
+      "property": "actsWithin",
+      "object": "SupportEnvironment_AG3"
+    },
+    {
+      "subject": "EscalationAgent_AG3",
+      "property": "actsWithin",
+      "object": "SupportEnvironment_AG3"
+    },
+    {
+      "subject": "FrontlineAgent_AG3",
+      "property": "delegatesTask",
+      "object": "LogComplaintTask_AG3"
+    },
+    {
+      "subject": "LogComplaintTask_AG3",
+      "property": "assignedTo",
+      "object": "EscalationAgent_AG3"
+    },
+    {
+      "subject": "LogComplaintTask_AG3",
+      "property": "occursIn",
+      "object": "SupportEnvironment_AG3"
+    },
+    {
+      "subject": "LogComplaintTask_AG3",
+      "property": "violatesConstraint",
+      "object": "RefundLimitConstraint_AG3"
+    },
+    {
+      "subject": "AuthorizationConflict_AG3",
+      "property": "involvesAgent",
+      "object": "FrontlineAgent_AG3"
+    },
+    {
+      "subject": "AuthorizationConflict_AG3",
+      "property": "involvesAgent",
+      "object": "EscalationAgent_AG3"
+    },
+    {
+      "subject": "EscalateComplaintTask_AG3",
+      "property": "resolvesConflict",
+      "object": "AuthorizationConflict_AG3"
+    },
+    {
+      "subject": "EscalateComplaintTask_AG3",
+      "property": "dependsOn",
+      "object": "LogComplaintTask_AG3"
+    },
+    {
+      "subject": "EscalateComplaintTask_AG3",
+      "property": "assignedTo",
+      "object": "FrontlineAgent_AG3"
+    },
+    {
+      "subject": "EscalationAgent_AG3",
+      "property": "sendsMessage",
+      "object": "RefundMessage_AG3"
+    },
+    {
+      "subject": "RefundMessage_AG3",
+      "property": "supportsDecision",
+      "object": "RefundApprovalDecision_AG3"
+    }
+  ],
+  "story_summary": "A Frontline support agent logs a customer's damaged-shipment complaint, but the requested refund exceeds the agent's authorization limit -- a conflict. The case is escalated, and the Escalation agent authorizes a full refund."
+}

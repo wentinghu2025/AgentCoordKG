@@ -1,0 +1,178 @@
+{
+  "scenario_name": "MetaGPT-style SOP-Governed Procurement Approval — Case 5 for AgentCoordKG",
+  "description": "Hand-authored scenario following MetaGPT's real Role/Environment/Message/SOP schema (confirmed via official MetaGPT documentation), NOT a live MetaGPT run. Demonstrates AgentCoordKG's coverage of the fifth and final framework studied, including a fourth independent confirmation that a framework's orchestration primitive (here, SOP) maps onto dependsOn, and a third confirmation that Environment is a genuinely shared concept with HarnessKG (this time using MetaGPT's identically-named Environment/Message primitives, the strongest direct terminological match found in this framework study, mirroring the same finding in HarnessKG's MetaGPT scenario).",
+  "_metagpt_native_log": {
+    "_comment": "Mimics a real MetaGPT multi-role procurement team governed by an SOP, using MetaGPT's actual concepts (Role, Environment, Message publish/observe, SOP-defined execution order). Not itself part of the RDF instance data.",
+    "roles": [
+      {
+        "name": "ProcurementOfficer",
+        "action": "SubmitPurchaseOrder"
+      },
+      {
+        "name": "BudgetAuditor",
+        "action": "AuditPurchaseOrder"
+      }
+    ],
+    "sop": {
+      "description": "BudgetAuditor's action must not begin until ProcurementOfficer's action publishes its output Message",
+      "order": [
+        "ProcurementOfficer",
+        "BudgetAuditor"
+      ]
+    },
+    "environment": {
+      "description": "Shared space where Roles observe and publish_message"
+    },
+    "run_trace": [
+      {
+        "role": "ProcurementOfficer",
+        "step": "_act",
+        "output_message": "Purchase order submitted: 500 units, $48,000"
+      },
+      {
+        "role": "BudgetAuditor",
+        "step": "_observe",
+        "input": "ProcurementOfficer's published Message"
+      },
+      {
+        "role": "BudgetAuditor",
+        "step": "_act",
+        "output_message": "Audit failed: order exceeds quarterly budget allocation"
+      }
+    ]
+  },
+  "_mapping_decision_tree_notes": {
+    "Role (LLM + Observation + Thought + Action + Memory)": "Maps directly to ak:Agent -- no ontology change needed.",
+    "Environment (shared space for observe/publish_message)": "Maps directly to ak:Environment -- MetaGPT's own term and definition match nearly verbatim, the strongest direct terminological match found in this framework study, mirroring the identical finding in HarnessKG's own MetaGPT scenario (Environment is confirmed as a genuinely shared concept across both companion ontologies from a third independent angle).",
+    "Message (published output of a Role's Action)": "Maps directly to ak:Message.",
+    "SOP (Standard Operating Procedure, constrains execution order)": "FOURTH INDEPENDENT CONFIRMATION: maps directly to dependsOn (Task -> Task) -- BudgetAuditor's task cannot begin until ProcurementOfficer's task completes and publishes output. This is the fourth framework (after CrewAI's Process, AutoGen's GroupChatManager, LangGraph's Edge) whose native orchestration primitive lands cleanly on AgentCoordKG's dependsOn, providing strong convergent evidence that dependsOn is a genuinely framework-agnostic coordination relation.",
+    "Memory (stores past experiences for learning)": "NO AgentCoordKG equivalent -- third independent confirmation (after CrewAI's Crew.memory=True and LangGraph's State/Checkpointer) that a framework's memory-flavored primitive belongs entirely to HarnessKG, never to AgentCoordKG.",
+    "Action (the executed capability within _act)": "NO separate ak:Class -- consistent with HarnessKG's MetaGPT scenario, Action is the internal mechanism producing a Message, not itself instantiated as a node.",
+    "Budget audit failure (BudgetAuditor's action reveals an overspend)": "Interpreted (not native to MetaGPT) as violatesConstraint -> Conflict, consistent with the interpretive pattern used across all AgentCoordKG framework scenarios.",
+    "Acceptance of the revised, budget-compliant purchase order": "Interpreted (not native to MetaGPT) as triggering ak:Decision, consistent with the task-outcome Decisions found across all five AgentCoordKG framework scenarios."
+  },
+  "instances": [
+    {
+      "id": "OfficerRole_AK5",
+      "type": "Agent",
+      "label": "MetaGPT ProcurementOfficer Role"
+    },
+    {
+      "id": "AuditorRole_AK5",
+      "type": "Agent",
+      "label": "MetaGPT BudgetAuditor Role"
+    },
+    {
+      "id": "ProcurementEnvironment_AK5",
+      "type": "Environment",
+      "label": "MetaGPT Environment (shared observe/publish space)"
+    },
+    {
+      "id": "SubmitOrderTask_AK5",
+      "type": "Task",
+      "label": "SubmitPurchaseOrder task",
+      "status": "conflicted",
+      "partOfWorkflow": "sop-governed-procurement-workflow",
+      "derivedFromCitation": "16"
+    },
+    {
+      "id": "ReviseOrderTask_AK5",
+      "type": "Task",
+      "label": "AuditPurchaseOrder task after SOP-ordered dependency",
+      "status": "completed",
+      "partOfWorkflow": "sop-governed-procurement-workflow",
+      "derivedFromCitation": "24"
+    },
+    {
+      "id": "BudgetConstraint_AK5",
+      "type": "Constraint",
+      "label": "Purchase orders must not exceed the quarterly budget allocation"
+    },
+    {
+      "id": "BudgetOverrunConflict_AK5",
+      "type": "Conflict",
+      "label": "Purchase order exceeds quarterly budget allocation",
+      "conflictType": "budget_violation",
+      "rationale": "BudgetAuditor's audit revealed that the submitted purchase order exceeds the allocated quarterly budget."
+    },
+    {
+      "id": "AuditResultMessage_AK5",
+      "type": "Message",
+      "label": "Published audit result Message",
+      "performative": "inform"
+    },
+    {
+      "id": "OrderApprovalDecision_AK5",
+      "type": "Decision",
+      "label": "Decision to approve the revised, budget-compliant purchase order (interpreted, not native to MetaGPT)"
+    }
+  ],
+  "relations": [
+    {
+      "subject": "OfficerRole_AK5",
+      "property": "actsWithin",
+      "object": "ProcurementEnvironment_AK5"
+    },
+    {
+      "subject": "AuditorRole_AK5",
+      "property": "actsWithin",
+      "object": "ProcurementEnvironment_AK5"
+    },
+    {
+      "subject": "SubmitOrderTask_AK5",
+      "property": "assignedTo",
+      "object": "OfficerRole_AK5"
+    },
+    {
+      "subject": "SubmitOrderTask_AK5",
+      "property": "occursIn",
+      "object": "ProcurementEnvironment_AK5"
+    },
+    {
+      "subject": "SubmitOrderTask_AK5",
+      "property": "violatesConstraint",
+      "object": "BudgetConstraint_AK5"
+    },
+    {
+      "subject": "BudgetOverrunConflict_AK5",
+      "property": "involvesAgent",
+      "object": "OfficerRole_AK5"
+    },
+    {
+      "subject": "BudgetOverrunConflict_AK5",
+      "property": "involvesAgent",
+      "object": "AuditorRole_AK5"
+    },
+    {
+      "subject": "ReviseOrderTask_AK5",
+      "property": "resolvesConflict",
+      "object": "BudgetOverrunConflict_AK5"
+    },
+    {
+      "subject": "ReviseOrderTask_AK5",
+      "property": "dependsOn",
+      "object": "SubmitOrderTask_AK5"
+    },
+    {
+      "subject": "ReviseOrderTask_AK5",
+      "property": "assignedTo",
+      "object": "AuditorRole_AK5"
+    },
+    {
+      "subject": "OfficerRole_AK5",
+      "property": "delegatesTask",
+      "object": "ReviseOrderTask_AK5"
+    },
+    {
+      "subject": "AuditorRole_AK5",
+      "property": "sendsMessage",
+      "object": "AuditResultMessage_AK5"
+    },
+    {
+      "subject": "AuditResultMessage_AK5",
+      "property": "supportsDecision",
+      "object": "OrderApprovalDecision_AK5"
+    }
+  ],
+  "story_summary": "A Procurement Officer submits a purchase order that exceeds the quarterly budget -- a conflict flagged by the Budget Auditor. The order is revised and resubmitted, and the auditor's report supports the final approval decision."
+}
