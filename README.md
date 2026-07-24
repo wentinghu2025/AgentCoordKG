@@ -21,7 +21,7 @@ accompanies the poster submission itself.
 ```
 agentcoordkg-repo/
 ├── ontology/           Final locked ontology (OWL/Turtle)
-├── evidence/            Literature-derived, citation-grounded evaluation questions
+├── evidence/            Literature-derived, citation-grounded evaluation questions, and framework documentation source links
 ├── prototype/           Prototype scripts, hand-authored scenarios, and the interactive HTML demo
 │   ├── scenarios/        Source JSON for all 8 scenarios (3 illustrative + 5 framework-grounded)
 │   └── generated/        Reproducible build outputs (RDF instance graphs)
@@ -39,6 +39,7 @@ agentcoordkg-repo/
 | Reproduce the Knowledge Graph construction | `prototype/json_to_rdf.py` — same script used for HarnessKG; namespace is auto-inferred from the loaded ontology, so no per-ontology modification is needed |
 | Reproduce the Ontology Consistency check | `prototype/run_reasoner_check.py` — requires `pip install owlready2` and a local Java runtime |
 | See standalone Figures (Cross-Framework Convergence, Ontology Schema) | `figures/` |
+| Find the official documentation for the 5 real frameworks (AutoGen, CrewAI, LangGraph, MetaGPT, OpenAI Agents SDK) used to ground the framework-specific scenarios | `evidence/framework_documentation_sources.md` |
 
 The full write-up (Methodology, Results, Discussion, Research Questions)
 accompanies the poster submission itself; this repository provides the
